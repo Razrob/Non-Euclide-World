@@ -9,6 +9,8 @@ public static class WorldLayersRepository
 {
     private static HashSet<WorldLayer> _layers;
 
+    public static IReadOnlyCollection<WorldLayer> RegisteredLayers => _layers;
+
 #if UNITY_EDITOR
     [InitializeOnLoadMethod]
 #endif
@@ -18,8 +20,14 @@ public static class WorldLayersRepository
         _layers = new HashSet<WorldLayer>();
     }
 
-    public static void TryAddLayer(WorldLayer worldLayer)
+    public static void TryRegisterLayer(WorldLayer worldLayer)
     {
         _layers.Add(worldLayer);
     }
+
+    public static void TryUnregisterLayer(WorldLayer worldLayer)
+    {
+        _layers.Remove(worldLayer);
+    }
 }
+ 
