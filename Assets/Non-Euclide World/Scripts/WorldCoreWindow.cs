@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+
+using UnityEngine;
 using UnityEditor;
 
 [CustomEditor(typeof(WorldCore))]
@@ -40,3 +42,5 @@ public class WorldCoreWindow : EditorWindow
         EditorGUILayout.EndVertical();
     }
 }
+
+#endif

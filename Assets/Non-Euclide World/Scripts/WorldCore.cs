@@ -11,6 +11,7 @@ public static class WorldCore
     public const string WORLD_CONFIG_NAME = "WorldConfig";
 
     public static int? ActiveWorldLayerID { get; private set; }
+    public static int? LastActiveWorldLayerID { get; private set; }
 
     private static Shader _mainStandardShader;
     private static Shader _secondStandardShader;
@@ -32,19 +33,21 @@ public static class WorldCore
 
     private static void InitWorld()
     {
-
+        OnConfigValidate();
     }
 
     private static void OnConfigValidate()
     {
-        if (!Application.isPlaying)
-            SetActiveLayers(WorldConfig.Instance.MainWorldLayerID);
+        SetActiveLayers(WorldConfig.Instance.MainWorldLayerID);
     }
 
-    public static void SetActiveLayers(int layerID, params int[] additional)
+    public static void SetActiveLayers(int layerID, params int[] additional) 
     {
-        if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID == WorldConfig.Instance.MainWorldLayerID)
-            return;
+        //if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID)
+        //    return;
+
+        LastActiveWorldLayerID = ActiveWorldLayerID;
+        ActiveWorldLayerID = layerID;
 
         foreach (WorldLayer worldLayer in WorldLayersRepository.RegisteredLayers)
         {

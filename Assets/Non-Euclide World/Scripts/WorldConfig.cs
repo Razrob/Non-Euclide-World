@@ -8,19 +8,13 @@ using UnityEditor;
 [DefaultExecutionOrder(-15)]
 public class WorldConfig : ScriptableObject
 {
-    [SerializeField] private int _mainWorldLayerID;
+    [SerializeField] private WorldLayerID _mainWorldLayerID;
 
-    public int MainWorldLayerID => _mainWorldLayerID;
+    public int MainWorldLayerID => _mainWorldLayerID.LayerID;
 
     public static WorldConfig Instance { get; private set; }
 
     public event Action OnValidateEvent;
-
-#if UNITY_EDITOR
-
-    public string MainWorldLayerIndexFieldName => nameof(_mainWorldLayerID);
-
-#endif
 
     private void OnValidate()
     {

@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f520a85c54c46104eb300f5465670ac3, type: 3}
   m_Name: WorldConfig
   m_EditorClassIdentifier: 
-  _mainWorldLayerID: 1
+  _mainWorldLayerID:
+    _layerID: 0

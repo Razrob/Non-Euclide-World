@@ -7,7 +7,7 @@ using UnityEditor;
 
 public static class WorldLayersRepository
 {
-    private static HashSet<WorldLayer> _layers;
+    private static SortedSet<WorldLayer> _layers;
 
     public static IReadOnlyCollection<WorldLayer> RegisteredLayers => _layers;
 
@@ -17,17 +17,23 @@ public static class WorldLayersRepository
     [RuntimeInitializeOnLoadMethod]
     private static void Initialize()
     {
-        _layers = new HashSet<WorldLayer>();
+        if (_layers is null) 
+            _layers = new SortedSet<WorldLayer>(new WorldLayerComparer());
     }
 
     public static void TryRegisterLayer(WorldLayer worldLayer)
     {
+        Initialize();
+
         _layers.Add(worldLayer);
     }
 
     public static void TryUnregisterLayer(WorldLayer worldLayer)
     {
+        Initialize();
+
         _layers.Remove(worldLayer);
     }
+
+    public static WorldLayer GetWithID(int id) => _layers.Find(l => l.LayerID == id);
 }
- 
