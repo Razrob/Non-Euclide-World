@@ -48,5 +48,5 @@ Shader "Stencil/StencilStandard_Second"
         }
         ENDCG
     }
-    FallBack "Diffuse"
+    //FallBack "Diffuse"
 }

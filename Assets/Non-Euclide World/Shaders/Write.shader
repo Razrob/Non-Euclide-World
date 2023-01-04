@@ -5,7 +5,7 @@ Shader "Stencil/Write"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue" = "Geometry-1"}
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry"}
 
         Blend Zero One
         ZWrite Off
