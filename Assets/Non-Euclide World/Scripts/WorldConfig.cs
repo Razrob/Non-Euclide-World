@@ -12,7 +12,17 @@ public class WorldConfig : ScriptableObject
 
     public int MainWorldLayerID => _mainWorldLayerID.LayerID;
 
-    public static WorldConfig Instance { get; private set; }
+    public static WorldConfig _instance { get; private set; }
+    public static WorldConfig Instance
+    {
+        get
+        {
+            if (_instance is null)
+                Init();
+
+            return _instance;
+        }
+    }
 
     public event Action OnValidateEvent;
 
@@ -34,7 +44,7 @@ public class WorldConfig : ScriptableObject
     private static void Init()
     {
         string configPath = $"{WorldCore.WORLD_CONFIG_PATH_RESOURCES_EXCLUDE}/{WorldCore.WORLD_CONFIG_NAME}";
-        Instance = Resources.Load(configPath, typeof(WorldConfig)) as WorldConfig;
-        Instance.OnValidateEvent = null;
+        _instance = Resources.Load(configPath, typeof(WorldConfig)) as WorldConfig;
+        _instance.OnValidateEvent = null;
     }
 }
