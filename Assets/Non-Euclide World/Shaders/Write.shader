@@ -1,37 +1,33 @@
 Shader "Stencil/Write"
 {
-    Properties
-    {
-    }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue" = "Geometry"}
-
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry" }
+        
         Blend Zero One
         ZWrite Off
+        
+        Stencil
+        {
+            Ref 1
+            Comp Always
+            Pass Replace
+            Fail Keep
+        }
 
         Pass
         {
-            Stencil
-            {
-                Ref 1
-                Comp always
-                Pass replace
-            }
 
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-
+            
             #include "UnityCG.cginc"
 
             struct appdata
             {
                 float4 vertex : POSITION;
             };
-
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
 
             float4 vert (appdata v) : SV_POSITION
             {
@@ -40,8 +36,10 @@ Shader "Stencil/Write"
 
             fixed4 frag () : SV_Target
             {
+                return fixed4(1, 1, 1, 0.1);
                 return 0;
             }
+            
             ENDCG
         }
     }

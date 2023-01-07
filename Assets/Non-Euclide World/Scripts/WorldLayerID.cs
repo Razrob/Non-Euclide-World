@@ -12,4 +12,9 @@ public class WorldLayerID
     public static string LayerIDFieldName => nameof(_layerID);
 
 #endif
+
+    public WorldLayerID(int layerID)
+    {
+        _layerID = layerID;
+    }
 }

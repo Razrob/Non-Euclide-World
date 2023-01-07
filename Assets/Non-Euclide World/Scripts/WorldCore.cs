@@ -38,20 +38,20 @@ public static class WorldCore
 
     private static void OnConfigValidate()
     {
-        SetActiveLayers(WorldConfig.Instance.MainWorldLayerID);
+        SetActiveLayer(WorldConfig.Instance.MainWorldLayerID);
     }
 
-    public static void SetActiveLayers(int layerID, params int[] additional) 
+    public static void SetActiveLayer(int layerID) 
     {
-        //if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID)
-        //    return;
+        if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID)
+            return;
 
         LastActiveWorldLayerID = ActiveWorldLayerID;
         ActiveWorldLayerID = layerID;
 
         foreach (WorldLayer worldLayer in WorldLayersRepository.RegisteredLayers)
         {
-            bool active = worldLayer.LayerID == layerID || additional.Contains(id => id == worldLayer.LayerID);
+            bool active = worldLayer.LayerID == layerID/* || additional.Contains(id => id == worldLayer.LayerID)*/;
 
             worldLayer.SetLayerActivity(active);
             worldLayer.SetLayerShader(active ? _mainStandardShader : _secondStandardShader);

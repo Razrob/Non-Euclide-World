@@ -5,19 +5,19 @@ using UnityEngine;
 public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
 {
     [SerializeField] private PortalTriggerableEntityTriggerBehaviour _portalCenterTriggerBehaviour;
-    [SerializeField] private MainCameraContainsTriggerBehaviour _visualMaskTriggerBehaviour;
     [SerializeField] private Transform _portalDirection;
-    [SerializeField] private MeshRenderer _portalRenderer;
+    [SerializeField] private GameObject _portalMask;
     [SerializeField] private WorldPortalSwitchingMethod _switchingMethod;
     [SerializeReference] private WorldPortalSwitchInfoBase _worldPortalSwitchInfo;
 
-    private float? _lastEnterDotResult;
+    private PortalTriggerableEntity _containsEntity;
+    private float? _lastPlayerDotResult;
 
-    public bool CameraInMaskZone => _visualMaskTriggerBehaviour.ContainsComponents.Count > 0;
+    public Plane RealPortalPlane => new Plane(_portalDirection.forward, _portalMask.transform.position);
+    public Plane StartPortalPlane => new Plane(_portalDirection.forward, _portalDirection.position);
     public bool IsActive { get; private set; }
 
     public event Action<WorldPortal> OnActiveChange;
-    public event Action<WorldPortal> OnCameraTriggerChange;
 
     private void OnValidate()
     {
@@ -38,44 +38,36 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     private void Awake()
     {
         _portalCenterTriggerBehaviour.EnterEvent += OnEnter;
+        _portalCenterTriggerBehaviour.StayEvent += OnStay;
         _portalCenterTriggerBehaviour.ExitEvent += OnExit;
-
-        _visualMaskTriggerBehaviour.EnterEvent += triggerable => OnCameraTriggerChange?.Invoke(this);
-        _visualMaskTriggerBehaviour.ExitEvent += triggerable => OnCameraTriggerChange?.Invoke(this);
     }
 
     private float GetTriggerablePortalDotResult(ITriggerable triggerable)
     {
-        Vector3 triggerableToPortalDirection = (_portalDirection.position.XZ() - triggerable.Transform.position.XZ()).normalized;
+        Vector3 triggerableToPortalDirection = (_portalMask.transform.position.XZ() - triggerable.Transform.position.XZ()).normalized;
         Vector3 portDirection = _portalDirection.forward.XZ().normalized;
 
         return Vector3.Dot(triggerableToPortalDirection, portDirection);
     }
 
-    private void OnEnter(ITriggerable triggerable)
+    private WorldLayerID CalculateNextLayer(ITriggerable triggerable, float dotResult)
     {
-        float dotResult = GetTriggerablePortalDotResult(triggerable);
-        _lastEnterDotResult = dotResult;
-        WorldLayer nextLayer = null;
+        int? nextLayer = null;
 
         switch (_switchingMethod)
         {
             case WorldPortalSwitchingMethod.Switch_To_Next_Layer:
 
-                if (dotResult >= 0)
-                    nextLayer = WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value);
-                else
-                    nextLayer = WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value);
-
+                nextLayer = dotResult >= 0 
+                    ? WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value).LayerID
+                    : WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value).LayerID;
                 break;
 
             case WorldPortalSwitchingMethod.Switch_To_Previous_Layer:
 
-                if (dotResult >= 0)
-                    nextLayer = WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value);
-                else
-                    nextLayer = WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value);
-
+                nextLayer = dotResult >= 0
+                    ? WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value).LayerID
+                    : WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value).LayerID;
                 break;
 
             case WorldPortalSwitchingMethod.Switch_To_Specific_Layer:
@@ -84,186 +76,100 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
 
                 if (dotResult >= 0)
                 {
-                    nextLayer = WorldLayersRepository.GetWithID(info.NextWorldLayerID);
+                    nextLayer = info.NextWorldLayerID;
                     info.SetPreviousWorldLayerID(WorldCore.ActiveWorldLayerID.Value);
                 }
                 else
-                    nextLayer = WorldLayersRepository.GetWithID(info.PreviousWorldLayerID);
-
+                    nextLayer = info.PreviousWorldLayerID;
                 break;
         }
 
-        WorldCore.SetActiveLayers(nextLayer.LayerID);
-        //Debug.Log("_last: " + _lastEnterDotResult.Value);
-        //Debug.Log(transform.parent.name + " " + nextLayer.LayerID);
+        return new WorldLayerID(nextLayer.Value);
+    }
 
-        _portalRenderer.enabled = false;
+    private void OnEnter(ITriggerable triggerable)
+    {
+        _portalMask.transform.position = _portalDirection.position;
+        _containsEntity = triggerable.Cast<PortalTriggerableEntity>();
+        RefreshLayers();
+    }
+
+    private void OnStay(ITriggerable triggerable)
+    {
+        if (_containsEntity != null)
+            RefreshLayers();
+    }
+
+    private void Update()
+    {
+        if (_containsEntity != null)
+            RefreshLayers();
     }
 
     private void OnExit(ITriggerable triggerable)
     {
-        if (!_lastEnterDotResult.HasValue)
+        _containsEntity = null;
+        _lastPlayerDotResult = null;
+        _portalMask.transform.position = _portalDirection.position;
+    }
+
+    private void RefreshLayers()
+    {
+        if (_containsEntity is null)
             return;
 
-        //Debug.Log("exit");
-        float dotResult = GetTriggerablePortalDotResult(triggerable);
+        float dotResult = GetTriggerablePortalDotResult(_containsEntity);
+        float minCameraPortalDistance = Mathf.Min(_containsEntity.Camera.nearClipPlane * 5f, 0.3f);
+        float portalOffcet = minCameraPortalDistance * 2f;
 
-        if (dotResult.SignsDiferrent(_lastEnterDotResult.Value))
-        {
-            _portalCenterTriggerBehaviour.Collider.enabled = false;
-            //_visualMaskTriggerBehaviour.gameObject.SetActive(false);
-            IsActive = false;
-            OnActiveChange?.Invoke(this);
-        }
-        else 
-        {
-            //Debug.Log("last: " + _lastEnterDotResult.Value + " current: " + dotResult);
+        float cameraToRealPortalDistance = RealPortalPlane.GetDistanceToPoint(_containsEntity.Camera.transform.position);
+        float cameraToStartPortalDistance = StartPortalPlane.GetDistanceToPoint(_containsEntity.Camera.transform.position);
 
-            switch (_switchingMethod)
+        if (Mathf.Abs(cameraToRealPortalDistance) < minCameraPortalDistance)
+        {
+            if (Mathf.Abs(cameraToRealPortalDistance) < Mathf.Abs(cameraToStartPortalDistance))
+                _portalMask.transform.position = _portalDirection.position;
+            else
             {
-                case WorldPortalSwitchingMethod.Switch_To_Next_Layer:
-                     
-                    WorldCore.SetActiveLayers(WorldCore.LastActiveWorldLayerID.Value);
-
-                    break;
-
-                case WorldPortalSwitchingMethod.Switch_To_Previous_Layer:
-
-                    WorldCore.SetActiveLayers(WorldCore.LastActiveWorldLayerID.Value);
-
-                    break;
-
-                case WorldPortalSwitchingMethod.Switch_To_Specific_Layer:
-
-                    WorldPortalSpecificSwitchInfo info = _worldPortalSwitchInfo.Cast<WorldPortalSpecificSwitchInfo>();
-                    WorldCore.SetActiveLayers(info.PreviousWorldLayerID);
-
-                    break;
+                Vector3 direction = _portalDirection.forward * (dotResult >= 0f ? 1f : -1f);
+                _portalMask.transform.position = _portalDirection.position + direction * portalOffcet;
             }
         }
 
-        _lastEnterDotResult = null;
+        dotResult = GetTriggerablePortalDotResult(_containsEntity);
 
-        if (!CameraInMaskZone)
-            _visualMaskTriggerBehaviour.gameObject.SetActive(false);
-        else
+        if (_lastPlayerDotResult.HasValue)
         {
-            OnCameraTriggerChange += CameraTriggerChange;
+            WorldLayerID nextLayerID = CalculateNextLayer(_containsEntity, _lastPlayerDotResult.Value);
 
-            void CameraTriggerChange(WorldPortal worldPortal)
+            if (dotResult.SignsDiferrent(_lastPlayerDotResult.Value))
             {
-                if (worldPortal.IsActive || worldPortal.CameraInMaskZone)
-                    return;
-                
-                OnCameraTriggerChange -= CameraTriggerChange;
-                _visualMaskTriggerBehaviour.gameObject.SetActive(false);
+                //Debug.Log(transform.parent.name + " " + nextLayerID.LayerID);
+                WorldCore.SetActiveLayer(nextLayerID.LayerID);
+                return;
             }
         }
+
+        _lastPlayerDotResult = dotResult;
     }
 
     public void OnLayerActivate()
     {
-        float? dotResult = null;
-
-        if (PortalTriggerableEntity.Instance != null)
-            dotResult = GetTriggerablePortalDotResult(PortalTriggerableEntity.Instance);
-
-        //foreach (WorldPortal portal in WorldLayersRepository.GetWithID(WorldCore.ActiveWorldLayerID.Value).Portals)
-        //{
-        //    if (portal == this)
-        //        continue;
-
-        //    if (!portal._lastEnterDotResult.HasValue)
-        //        continue;
-
-        //    if (!dotResult.HasValue && portal._lastEnterDotResult.Value < dot)
-        //}
-
-        if (dotResult.HasValue && dotResult.Value < 0f)
-            _portalRenderer.enabled = true;
-
-        if (Application.isPlaying)
-        {
-            WorldLayer lastWorldLayer = null; 
-            
-            if (WorldCore.LastActiveWorldLayerID.HasValue)
-                lastWorldLayer = WorldLayersRepository.GetWithID(WorldCore.LastActiveWorldLayerID.Value);
-
-            if (lastWorldLayer is null || 
-                lastWorldLayer.Portals.Count is 0 || lastWorldLayer.Portals.All(p => !p.IsActive && !p.CameraInMaskZone))
-            {
-                _portalCenterTriggerBehaviour.Collider.enabled = true;
-                _visualMaskTriggerBehaviour.gameObject.SetActive(true);
-                _portalRenderer.enabled = true;
-                IsActive = true;
-                OnActiveChange?.Invoke(this);
-            }
-            else
-            {
-                foreach (WorldPortal worldPortal in lastWorldLayer.Portals)
-                {
-                    if (!worldPortal.IsActive && !worldPortal.CameraInMaskZone)
-                        continue;
-
-                    worldPortal.OnActiveChange += OnOtherPortalActiveChange;
-                    worldPortal.OnCameraTriggerChange += OnOtherPortalCameraTriggerChange;
-                    break;
-                }
-
-                void OnOtherPortalActiveChange(WorldPortal otherPortal)
-                {
-                    if (otherPortal.IsActive || otherPortal.CameraInMaskZone)
-                        return;
-
-                    otherPortal.OnActiveChange -= OnOtherPortalActiveChange;
-                    otherPortal.OnCameraTriggerChange -= OnOtherPortalCameraTriggerChange;
-
-                    _portalCenterTriggerBehaviour.Collider.enabled = true;
-                    _visualMaskTriggerBehaviour.gameObject.SetActive(true);
-                    _portalRenderer.enabled = true;
-                    IsActive = true;
-                    OnActiveChange?.Invoke(this);
-                }
-
-                void OnOtherPortalCameraTriggerChange(WorldPortal otherPortal)
-                {
-                    if (otherPortal.IsActive || otherPortal.CameraInMaskZone)
-                        return;
-
-                    otherPortal.OnActiveChange -= OnOtherPortalActiveChange;
-                    otherPortal.OnCameraTriggerChange -= OnOtherPortalCameraTriggerChange;
-
-                    _portalCenterTriggerBehaviour.Collider.enabled = true;
-                    _visualMaskTriggerBehaviour.gameObject.SetActive(true);
-                    _portalRenderer.enabled = true;
-                    IsActive = true;
-                    OnActiveChange?.Invoke(this);
-                }
-            }
-        }
-        else
-        {
-            _portalRenderer.enabled = true;
-            _portalCenterTriggerBehaviour.Collider.enabled = true;
-            _visualMaskTriggerBehaviour.gameObject.SetActive(true);
-            IsActive = true;
-            OnActiveChange?.Invoke(this);
-        }
+        SetPortalActive(true);
     }
 
     public void OnLayerDeactivate()
     {
-        if (Application.isPlaying)
-        {
+        SetPortalActive(false);
+    }
 
-        }
-        else
-        {
-            _portalRenderer.enabled = false;
-            _portalCenterTriggerBehaviour.Collider.enabled = false;
-            _visualMaskTriggerBehaviour.gameObject.SetActive(false);
-            IsActive = false;
-            OnActiveChange?.Invoke(this);
-        }
+    public void SetPortalActive(bool value)
+    {
+        _portalCenterTriggerBehaviour.gameObject.SetActive(value);
+        //_portalCenterTriggerBehaviour.Collider.enabled = value;
+        //_portalCenterTriggerBehaviour.enabled = value;
+        _portalMask.gameObject.SetActive(value);
+        IsActive = value;
+        OnActiveChange?.Invoke(this);
     }
 }

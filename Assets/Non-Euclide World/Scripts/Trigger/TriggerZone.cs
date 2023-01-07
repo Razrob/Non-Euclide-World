@@ -30,6 +30,7 @@ public abstract class TriggerZone : MonoBehaviour
     protected virtual int _maxContainsCount => int.MaxValue;
 
     public event Action<ITriggerable> EnterEvent;
+    public event Action<ITriggerable> StayEvent;
     public event Action<ITriggerable> ExitEvent;
 
     public bool Contains(ITriggerable component) => _containsComponents.Contains(component);
@@ -54,6 +55,20 @@ public abstract class TriggerZone : MonoBehaviour
 
             OnEnter(component);
             EnterEvent?.Invoke(component);
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (!ZoneActive)
+            return;
+
+        if (other.TryGetComponent(out ITriggerable component))
+        {
+            if (!_containsComponents.Contains(component))
+                return;
+
+            StayEvent?.Invoke(component);
         }
     }
 

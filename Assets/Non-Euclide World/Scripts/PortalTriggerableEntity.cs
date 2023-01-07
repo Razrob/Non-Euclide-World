@@ -3,15 +3,8 @@ using UnityEngine;
 
 public class PortalTriggerableEntity : MonoBehaviour, ITriggerable
 {
+    [SerializeField] private Camera _camera;
+
     public Transform Transform => transform;
-
-    public static PortalTriggerableEntity Instance { get; private set; }
-
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-            throw new Exception("PortalTriggerableEntity should be only one");
-
-        Instance = this;
-    }
+    public Camera Camera => _camera;
 }
