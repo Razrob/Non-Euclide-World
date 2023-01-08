@@ -12,9 +12,9 @@ public partial class WorldPortal
         [SerializeField] private WorldLayerID _nextWorldLayer;
 
         public int NextWorldLayerID => _nextWorldLayer.LayerID;
-        public int PreviousWorldLayerID { get; private set; }
+        public int? PreviousWorldLayerID { get; private set; }
 
-        public void SetPreviousWorldLayerID(int id)
+        public void SetPreviousWorldLayerID(int? id)
         {
             PreviousWorldLayerID = id;
         }
