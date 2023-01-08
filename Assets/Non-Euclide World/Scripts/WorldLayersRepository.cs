@@ -1,39 +1,36 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-public static class WorldLayersRepository
+public class WorldLayersRepository
 {
-    private static SortedSet<WorldLayer> _layers;
+    private static WorldLayersRepository _instance;
+    public static WorldLayersRepository Instance => TryInitialize();
 
-    public static IReadOnlyCollection<WorldLayer> RegisteredLayers => _layers;
+    private SortedSet<WorldLayer> _layers;
+    public IReadOnlyCollection<WorldLayer> RegisteredLayers => _layers;
 
-#if UNITY_EDITOR
-    [InitializeOnLoadMethod]
-#endif
-    [RuntimeInitializeOnLoadMethod]
-    private static void Initialize()
+    public WorldLayersRepository()
     {
-        if (_layers is null) 
-            _layers = new SortedSet<WorldLayer>(new WorldLayerComparer());
+        _layers = new SortedSet<WorldLayer>(new WorldLayerComparer());
     }
 
-    public static void TryRegisterLayer(WorldLayer worldLayer)
+    private static WorldLayersRepository TryInitialize()
     {
-        Initialize();
+        return _instance ?? (_instance = new WorldLayersRepository());
+    }
 
+    public void TryRegisterLayer(WorldLayer worldLayer)
+    {
         _layers.Add(worldLayer);
     }
 
-    public static void TryUnregisterLayer(WorldLayer worldLayer)
+    public void TryUnregisterLayer(WorldLayer worldLayer)
     {
-        Initialize();
-
         _layers.Remove(worldLayer);
     }
 
-    public static WorldLayer GetWithID(int id) => _layers.Find(l => l.LayerID == id);
+    public WorldLayer GetWithID(int id)
+    {
+        return _layers.Find(l => l.LayerID == id);
+    }
 }

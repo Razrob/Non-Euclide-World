@@ -1,50 +1,37 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
-[DefaultExecutionOrder(-15)]
 public class WorldConfig : ScriptableObject
 {
     [SerializeField] private WorldLayerID _mainWorldLayerID;
 
     public int MainWorldLayerID => _mainWorldLayerID.LayerID;
 
-    public static WorldConfig _instance { get; private set; }
-    public static WorldConfig Instance
-    {
-        get
-        {
-            if (_instance is null)
-                Init();
+    private static WorldConfig _instance;
+    public static WorldConfig Instance => TryInitialize();
 
-            return _instance;
-        }
-    }
-
-    public event Action OnValidateEvent;
+    private HashSet<Action> _onValidateListeners = new HashSet<Action>();
 
     private void OnValidate()
     {
-        OnValidateEvent?.Invoke();
+        foreach (Action action in _onValidateListeners)
+            action?.Invoke();
     }
 
-    private void Awake()
+    private static WorldConfig TryInitialize()
     {
-        Init();
+        if (_instance is null)
+        {
+            string configPath = $"{WorldCore.WORLD_CONFIG_PATH_RESOURCES_EXCLUDE}/{WorldCore.WORLD_CONFIG_NAME}";
+            _instance = Resources.Load(configPath, typeof(WorldConfig)) as WorldConfig;
+        }
+
+        return _instance;
     }
 
-
-#if UNITY_EDITOR
-    [InitializeOnLoadMethod]
-#endif
-    [RuntimeInitializeOnLoadMethod]
-    private static void Init()
+    public void TrySubscribeOnValidateEvent(Action action)
     {
-        string configPath = $"{WorldCore.WORLD_CONFIG_PATH_RESOURCES_EXCLUDE}/{WorldCore.WORLD_CONFIG_NAME}";
-        _instance = Resources.Load(configPath, typeof(WorldConfig)) as WorldConfig;
-        _instance.OnValidateEvent = null;
+        _onValidateListeners.Add(action);
     }
 }

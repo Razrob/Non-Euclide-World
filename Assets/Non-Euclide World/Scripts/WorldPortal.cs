@@ -50,7 +50,7 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
         return Vector3.Dot(triggerableToPortalDirection, portDirection);
     }
 
-    private WorldLayerID CalculateNextLayer(ITriggerable triggerable, float dotResult)
+    private WorldLayerID CalculateNextLayer(ITriggerable triggerable, float dotResult, int currentLayerID, bool withWrite = true)
     {
         int? nextLayer = null;
 
@@ -59,15 +59,15 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
             case WorldPortalSwitchingMethod.Switch_To_Next_Layer_With_Reverse:
 
                 nextLayer = dotResult >= 0 
-                    ? WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value).LayerID
-                    : WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value).LayerID;
+                    ? WorldLayerExtensions.CalculateNextLayer(currentLayerID).LayerID
+                    : WorldLayerExtensions.CalculatePreviousLayer(currentLayerID).LayerID;
                 break;
 
             case WorldPortalSwitchingMethod.Switch_To_Previous_Layer_With_Reverse:
 
                 nextLayer = dotResult >= 0
-                    ? WorldLayerExtensions.CalculatePreviousLayer(WorldCore.ActiveWorldLayerID.Value).LayerID
-                    : WorldLayerExtensions.CalculateNextLayer(WorldCore.ActiveWorldLayerID.Value).LayerID;
+                    ? WorldLayerExtensions.CalculatePreviousLayer(currentLayerID).LayerID
+                    : WorldLayerExtensions.CalculateNextLayer(currentLayerID).LayerID;
                 break;
 
             case WorldPortalSwitchingMethod.Switch_To_Specific_Layer_With_Reverse:
@@ -77,17 +77,20 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
                 if (dotResult >= 0)
                 {
                     nextLayer = info.NextWorldLayerID;
-                    info.SetPreviousWorldLayerID(WorldCore.ActiveWorldLayerID.Value);
+
+                    if (withWrite)
+                        info.SetPreviousWorldLayerID(currentLayerID);
                 }
                 else
                 {
                     if (info.PreviousWorldLayerID.HasValue)
                     {
                         nextLayer = info.PreviousWorldLayerID;
-                        info.SetPreviousWorldLayerID(null);
+                        if (withWrite)
+                            info.SetPreviousWorldLayerID(null);
                     }
                     else
-                        nextLayer = WorldCore.ActiveWorldLayerID.Value;
+                        nextLayer = currentLayerID;
                 }
                 break;
         }
@@ -146,13 +149,21 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
 
         dotResult = GetTriggerablePortalDotResult(_containsEntity);
 
+        //WorldCore.Instance.SetNextLayer(
+        //    CalculateNextLayer(_containsEntity, dotResult, WorldCore.Instance.ActiveWorldLayerID.Value, false).LayerID);
+
         if (_lastPlayerDotResult.HasValue)
         {
-            WorldLayerID nextLayerID = CalculateNextLayer(_containsEntity, _lastPlayerDotResult.Value);
-
             if (dotResult.SignsDiferrent(_lastPlayerDotResult.Value))
             {
-                WorldCore.SetActiveLayer(nextLayerID.LayerID);
+                WorldLayerID nextLayerID =
+                    CalculateNextLayer(_containsEntity, _lastPlayerDotResult.Value, WorldCore.Instance.ActiveWorldLayerID.Value);
+
+                WorldCore.Instance.SetActiveLayer(nextLayerID.LayerID, 0);
+
+                //WorldCore.Instance.SetActiveLayer(nextLayerID.LayerID,
+                //    CalculateNextLayer(_containsEntity, dotResult, nextLayerID.LayerID, false).LayerID);
+
                 return;
             }
         }

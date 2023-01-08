@@ -20,7 +20,7 @@ public class WorldCoreWindow : EditorWindow
         GUIStyle worldLayerLabelStyle = GUI.skin.label;
         worldLayerLabelStyle.fontSize = 15;
 
-        foreach (WorldLayer worldLayer in WorldLayersRepository.RegisteredLayers)
+        foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
             EditorGUILayout.BeginHorizontal();
 
@@ -40,6 +40,17 @@ public class WorldCoreWindow : EditorWindow
         }
 
         EditorGUILayout.EndVertical();
+
+        GUIStyle buttonStyle = WorldEditorStyles.DefaultButtonStyle;
+        buttonStyle.fixedHeight = 35f;
+        buttonStyle.fixedWidth = 300f;
+        Rect rect = EditorGUILayout.GetControlRect();
+        rect.height = 35f;
+        rect.width = 300f;
+        rect.x += (EditorGUIUtility.currentViewWidth - 300f) / 2f;
+
+        if (GUI.Button(rect, "Refresh world", buttonStyle))
+            WorldCore.InitWorld();
     }
 }
 

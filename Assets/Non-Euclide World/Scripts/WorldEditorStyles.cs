@@ -26,7 +26,19 @@ public static class WorldEditorStyles
         }
     }
 
-    private static Texture2D CreatePixelOneTexture(Color color)
+    public static GUIStyle DefaultButtonStyle
+    {
+        get
+        {
+            GUIStyle style = new GUIStyle("Button");
+            style.fixedHeight = 0;
+            style.alignment = TextAnchor.MiddleCenter;
+
+            return style;
+        }
+    }
+
+    public static Texture2D CreatePixelOneTexture(Color color)
     {
         Texture2D texture = new Texture2D(1, 1);
         texture.SetPixel(1, 1, color);

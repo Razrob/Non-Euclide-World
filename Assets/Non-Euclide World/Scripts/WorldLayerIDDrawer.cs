@@ -16,7 +16,7 @@ public class WorldLayerIDDrawer : PropertyDrawer
             return;
 
         _inited = true;
-        _worldLayerNames = WorldLayersRepository.RegisteredLayers
+        _worldLayerNames = WorldLayersRepository.Instance.RegisteredLayers
             .Select(layer => TransformWorldLayerToLabel(layer))
             .ToArray();
     }
@@ -36,13 +36,13 @@ public class WorldLayerIDDrawer : PropertyDrawer
     {
         SerializedProperty intIDProperty = layerIDProperty.FindPropertyRelative(WorldLayerID.LayerIDFieldName);
 
-        if (WorldLayersRepository.RegisteredLayers.Count > 0)
+        if (WorldLayersRepository.Instance.RegisteredLayers.Count > 0)
         {
-            WorldLayer mainWorldLayer = WorldLayersRepository.RegisteredLayers.Find(layer => layer.LayerID == intIDProperty.intValue);
+            WorldLayer mainWorldLayer = WorldLayersRepository.Instance.RegisteredLayers.Find(layer => layer.LayerID == intIDProperty.intValue);
 
             if (mainWorldLayer is null)
             {
-                mainWorldLayer = WorldLayersRepository.RegisteredLayers
+                mainWorldLayer = WorldLayersRepository.Instance.RegisteredLayers
                     .Find(layer => TransformWorldLayerToLabel(layer) == _worldLayerNames.First()); 
 
                 intIDProperty.intValue = mainWorldLayer.LayerID;
@@ -54,7 +54,7 @@ public class WorldLayerIDDrawer : PropertyDrawer
                 selectedLayerNameIndex = 0;
 
             int newSelectedNameIndex = EditorGUI.Popup(position, "MainLayer", selectedLayerNameIndex, _worldLayerNames);
-            int newSelectedWorldLayerID = WorldLayersRepository.RegisteredLayers
+            int newSelectedWorldLayerID = WorldLayersRepository.Instance.RegisteredLayers
                 .Find(layer => TransformWorldLayerToLabel(layer) == _worldLayerNames[newSelectedNameIndex]).LayerID;
 
             if (intIDProperty.intValue != newSelectedWorldLayerID)

@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 [ExecuteAlways]
-[DefaultExecutionOrder(-50)] 
+[DefaultExecutionOrder(-500)] 
 public class WorldLayer : MonoBehaviour
 {
     [SerializeField] private int _layerID;
@@ -14,9 +14,8 @@ public class WorldLayer : MonoBehaviour
     [SerializeField, HideInInspector] private MeshRenderer[] _meshRenderers;
     
     private ILayerChangeCallbackReceiver[] _callbackReceivers;
-    private WorldPortal[] _portals;
 
-    public IReadOnlyList<WorldPortal> Portals => _portals;
+    public IReadOnlyList<MeshRenderer> MeshRenderers => _meshRenderers;
     public int LayerID => _layerID;
 
 #if UNITY_EDITOR
@@ -37,9 +36,8 @@ public class WorldLayer : MonoBehaviour
             .ToArray();
 
         _callbackReceivers = GetComponentsInChildren<ILayerChangeCallbackReceiver>(true);
-        _portals = GetComponentsInChildren<WorldPortal>(true);
 
-        WorldLayersRepository.TryRegisterLayer(this);
+        WorldLayersRepository.Instance.TryRegisterLayer(this);
     }
 
     private void Awake()
@@ -47,11 +45,11 @@ public class WorldLayer : MonoBehaviour
         OnValidate();
     }
 
-    public void SetLayerShader(Shader shader)
+    public void SetLayerStencilParameter(string parameterName, int value)
     {
         foreach (MeshRenderer meshRenderer in _meshRenderers)
             foreach (Material material in meshRenderer.sharedMaterials)
-                material.shader = shader;
+                material.SetInt(parameterName, value);
     }
 
     public void SetLayerActivity(bool value)
@@ -70,6 +68,6 @@ public class WorldLayer : MonoBehaviour
 
     private void OnDestroy()
     {
-        WorldLayersRepository.TryUnregisterLayer(this);
+        WorldLayersRepository.Instance.TryUnregisterLayer(this);
     }
 }

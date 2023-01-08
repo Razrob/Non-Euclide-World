@@ -4,18 +4,18 @@ public static class WorldLayerExtensions
 {
     public static WorldLayer CalculateNextLayer(int currentLayerID)
     {
-        foreach (WorldLayer worldLayer in WorldLayersRepository.RegisteredLayers)
+        foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
             if (worldLayer.LayerID > currentLayerID)
                 return worldLayer;
 
-        return WorldLayersRepository.RegisteredLayers.First();
+        return WorldLayersRepository.Instance.RegisteredLayers.First();
     }
 
     public static WorldLayer CalculatePreviousLayer(int currentLayerID)
     {
         WorldLayer lastPreviousLayer = null;
 
-        foreach (WorldLayer worldLayer in WorldLayersRepository.RegisteredLayers)
+        foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
             if (worldLayer.LayerID >= currentLayerID)
             {
@@ -28,6 +28,6 @@ public static class WorldLayerExtensions
                 lastPreviousLayer = worldLayer;
         }
 
-        return WorldLayersRepository.RegisteredLayers.Last();
+        return WorldLayersRepository.Instance.RegisteredLayers.Last();
     }
 }
