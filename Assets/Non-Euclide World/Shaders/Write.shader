@@ -1,5 +1,10 @@
 Shader "Stencil/Write"
 {
+    Properties
+    {
+
+    }
+
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue" = "Geometry" }
@@ -17,7 +22,6 @@ Shader "Stencil/Write"
 
         Pass
         {
-
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -36,7 +40,6 @@ Shader "Stencil/Write"
 
             fixed4 frag () : SV_Target
             {
-                return fixed4(1, 1, 1, 0.1);
                 return 0;
             }
             
