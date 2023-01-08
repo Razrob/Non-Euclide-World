@@ -119,8 +119,8 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
             return;
 
         float dotResult = GetTriggerablePortalDotResult(_containsEntity);
-        float minCameraPortalDistance = Mathf.Min(_containsEntity.Camera.nearClipPlane * 5f, 0.3f);
-        float portalOffcet = minCameraPortalDistance * 2f;
+        float minCameraPortalDistance = Mathf.Min(_containsEntity.Camera.nearClipPlane * 20f, 0.3f);
+        float portalOffcet = minCameraPortalDistance * 3f;
 
         float cameraToRealPortalDistance = RealPortalPlane.GetDistanceToPoint(_containsEntity.Camera.transform.position);
         float cameraToStartPortalDistance = StartPortalPlane.GetDistanceToPoint(_containsEntity.Camera.transform.position);
