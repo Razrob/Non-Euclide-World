@@ -1,11 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 using System.IO;
 using System.Linq;
-using System.Collections;
-using static UnityEditor.Experimental.GraphView.GraphView;
-using System.Reflection;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -45,9 +41,9 @@ public class WorldCore
         return _instance;
     }
 
-#if UNITY_EDITOR
-    [InitializeOnLoadMethod]
-#endif
+//#if UNITY_EDITOR
+//    [InitializeOnLoadMethod]
+//#endif
     [RuntimeInitializeOnLoadMethod]
     public static void InitWorld()
     {
@@ -60,8 +56,7 @@ public class WorldCore
             return;
 
         CheckMeshRenderers();
-        SetActiveLayer(WorldConfig.Instance.MainWorldLayerID, 
-            WorldLayerExtensions.CalculateNextLayer(WorldConfig.Instance.MainWorldLayerID).LayerID);
+        SetActiveLayer(WorldConfig.Instance.MainWorldLayerID);
     }
 
 #if UNITY_EDITOR
@@ -84,77 +79,78 @@ public class WorldCore
     }
 #endif
 
-    private void CheckMeshRenderers()
+    public void CheckMeshRenderers()
     {
 #if UNITY_EDITOR
 
         if (WorldLayersRepository.Instance.RegisteredLayers.Count is 0)
             return;
 
-        try
+        //try
+        //{
+        string instancedMaterialsFolder = $"{CalculateParentFolderPath()}/{INSTANCED_MATERIALS_LOCAL_FOLDER_PATH}";
+
+        string[] mats = Directory.GetFiles(instancedMaterialsFolder);
+        _instancedMaterials = new HashSet<Material>(mats.Select(m => AssetDatabase.LoadAssetAtPath<Material>(m)));
+
+        foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
-            string instancedMaterialsFolder = $"{CalculateParentFolderPath()}/{INSTANCED_MATERIALS_LOCAL_FOLDER_PATH}";
-
-            string[] mats = Directory.GetFiles(instancedMaterialsFolder);
-            _instancedMaterials = new HashSet<Material>(mats.Select(m => AssetDatabase.LoadAssetAtPath<Material>(m)));
-
-            foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
+            foreach (MeshRenderer meshRenderer in worldLayer.MeshRenderers)
             {
-                foreach (MeshRenderer meshRenderer in worldLayer.MeshRenderers)
+                Material[] sharedMaterials = new Material[meshRenderer.sharedMaterials.Length];
+                bool arrayWasChanged = false;
+
+                for (int i = 0; i < meshRenderer.sharedMaterials.Length; i++)
                 {
-                    Material[] sharedMaterials = new Material[meshRenderer.sharedMaterials.Length];
-                    bool arrayWasChanged = false;
+                    Material meshMaterial = meshRenderer.sharedMaterials[i];
 
-                    for (int i = 0; i < meshRenderer.sharedMaterials.Length; i++)
+                    if (_instancedMaterials.Contains(meshMaterial))
                     {
-                        Material meshMaterial = meshRenderer.sharedMaterials[i];
+                        int materialLayerID =
+                            int.Parse(meshMaterial.name.Cut(meshMaterial.name.IndexOf('['), meshMaterial.name.IndexOf(']')));
 
-                        if (_instancedMaterials.Contains(meshMaterial))
+                        if (materialLayerID == worldLayer.LayerID)
+                            continue;
+
+                        if (!WorldLayersRepository.Instance.RegisteredLayers.Exist(l => l.LayerID == materialLayerID))
                         {
-                            int materialLayerID =
-                                int.Parse(meshMaterial.name.Cut(meshMaterial.name.IndexOf('['), meshMaterial.name.IndexOf(']')));
-
-                            if (materialLayerID == worldLayer.LayerID)
-                                continue;
-
-                            if (!WorldLayersRepository.Instance.RegisteredLayers.Exist(l => l.LayerID == materialLayerID))
-                            {
-                                meshMaterial.name = $"{meshMaterial.name.Replace($"[{materialLayerID}]", $"[{worldLayer.LayerID}]")}";
-                                AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshMaterial), meshMaterial.name);
-                            }
-                            else
-                            {
-                                sharedMaterials[i] = CreateMaterial(meshMaterial, worldLayer, instancedMaterialsFolder);
-                                arrayWasChanged = true;
-                            }
+                            meshMaterial.name = $"{meshMaterial.name.Replace($"[{materialLayerID}]", $"[{worldLayer.LayerID}]")}";
+                            AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshMaterial), meshMaterial.name);
                         }
                         else
                         {
                             sharedMaterials[i] = CreateMaterial(meshMaterial, worldLayer, instancedMaterialsFolder);
                             arrayWasChanged = true;
                         }
-
                     }
-
-
-                    if (arrayWasChanged)
+                    else
                     {
-                        EditorUtility.SetDirty(meshRenderer);
-                        meshRenderer.sharedMaterials = sharedMaterials;
-                        EditorUtility.ClearDirty(meshRenderer);
+                        sharedMaterials[i] = CreateMaterial(meshMaterial, worldLayer, instancedMaterialsFolder);
+                        arrayWasChanged = true;
                     }
+
+                }
+
+
+                if (arrayWasChanged)
+                {
+                    EditorUtility.SetDirty(meshRenderer);
+                    meshRenderer.sharedMaterials = sharedMaterials;
+                    EditorUtility.ClearDirty(meshRenderer);
                 }
             }
-
-            AssetDatabase.SaveAssets();
-    }
-        catch (Exception exception)
-        {
-            Debug.LogError($"During materials checking was thrown an exception: {exception.Message}\n{exception.StackTrace}");
         }
+
+        AssetDatabase.SaveAssets();
+        //}
+        //catch (Exception exception)
+        //{
+        //    Debug.LogError($"During materials checking was thrown an exception: {exception.Message}\n{exception.StackTrace}");
+        //}
 #endif
     }
 
+#if UNITY_EDITOR
     private Material CreateMaterial(Material origin, WorldLayer worldLayer, string instancedMaterialsFolder)
     {
         string firstNamePart = origin.name.Replace("(Clone)", "");
@@ -173,11 +169,12 @@ public class WorldCore
 
         return instancedMaterial;
     }
+#endif
 
-    public void SetActiveLayer(int layerID, int nextLayerID) 
+    public void SetActiveLayer(int layerID, int? nextLayerID = null)
     {
         if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID
-            && NextWorldLayerID.HasValue && NextWorldLayerID.Value == nextLayerID)
+            && NextWorldLayerID.HasValue && (!nextLayerID.HasValue || NextWorldLayerID.Value == nextLayerID))
             return;
 
         LastActiveWorldLayerID = ActiveWorldLayerID;
@@ -187,11 +184,9 @@ public class WorldCore
         foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
             bool active = worldLayer.LayerID == layerID;
-            bool next = worldLayer.LayerID == nextLayerID;
 
             worldLayer.SetLayerActivity(active);
-            //worldLayer.SetLayerStencilParameter(STENCIL_VALUE_SHADER_PARAMETER, active ? 0 : (next ? 1 : 2));
-            worldLayer.SetLayerStencilParameter(STENCIL_VALUE_SHADER_PARAMETER, active ? 0 : 1);
+            worldLayer.SetLayerStencilParameter(STENCIL_VALUE_SHADER_PARAMETER, active ? 0 : worldLayer.LayerID);
         }
     }
 
@@ -200,25 +195,3 @@ public class WorldCore
         SetActiveLayer(ActiveWorldLayerID.Value, nextLayerID);
     }
 }
-
-
-public class Lol
-{ 
-    private readonly int _lol;
-
-    public Lol()
-    {
-        _lol = 5;
-    }
-}
-
-public class ExtraLol
-{
-    public void DoLol()
-    {
-        Lol lol = new Lol();
-
-        lol.GetType().GetField("_lol", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(lol, 10);
-    }
-}
-

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: WorldConfig
   m_EditorClassIdentifier: 
   _mainWorldLayerID:
-    _layerID: 0
+    _layerID: 1

@@ -25,6 +25,7 @@ public class WorldConfig : ScriptableObject
         {
             string configPath = $"{WorldCore.WORLD_CONFIG_PATH_RESOURCES_EXCLUDE}/{WorldCore.WORLD_CONFIG_NAME}";
             _instance = Resources.Load(configPath, typeof(WorldConfig)) as WorldConfig;
+            _instance.OnValidate();
         }
 
         return _instance;

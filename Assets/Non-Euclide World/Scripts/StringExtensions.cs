@@ -19,6 +19,6 @@ public static class StringExtensions
         if (bound2Index < 0)
             return value;
 
-        return value.Substring(0, bound2Index - Convert.ToInt32(!boundsInclude));
+        return value.Substring(0, bound2Index - Convert.ToInt32(!boundsInclude) + 1);
     }
 }

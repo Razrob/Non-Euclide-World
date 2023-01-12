@@ -1,5 +1,10 @@
 Shader "Stencil/Write"
 {
+    Properties
+    {
+        [HideInInspector] _StencilValue ("StencilValue", int) = 1
+    }
+
     SubShader
     {
         Tags 
@@ -13,7 +18,7 @@ Shader "Stencil/Write"
         
         Stencil
         {
-            Ref 1
+            Ref [_StencilValue]
             Comp Always
             Pass Replace
             Fail Keep

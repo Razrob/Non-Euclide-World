@@ -10,6 +10,8 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     [SerializeField] private WorldPortalSwitchingMethod _switchingMethod;
     [SerializeReference] private WorldPortalSwitchInfoBase _worldPortalSwitchInfo;
 
+    private MeshRenderer _maskMeshRenderer;
+
     private PortalTriggerableEntity _containsEntity;
     private float? _lastPlayerDotResult;
 
@@ -21,6 +23,8 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
 
     private void OnValidate()
     {
+        _maskMeshRenderer = _portalMask.GetComponentInChildren<MeshRenderer>(true);
+
         switch (_switchingMethod)
         {
             case WorldPortalSwitchingMethod.Switch_To_Specific_Layer_With_Reverse:
@@ -115,6 +119,8 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     {
         if (_containsEntity != null)
             RefreshLayers();
+
+        RefreshNextLayerView();
     }
 
     private void OnExit(ITriggerable triggerable)
@@ -122,6 +128,16 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
         _containsEntity = null;
         _lastPlayerDotResult = null;
         _portalMask.transform.position = _portalDirection.position;
+    }
+
+    private void RefreshNextLayerView()
+    {
+        float dotResult = GetTriggerablePortalDotResult(PortalTriggerableEntity.Instance);
+
+        WorldLayerID nextLayerID =
+            CalculateNextLayer(PortalTriggerableEntity.Instance, dotResult, WorldCore.Instance.ActiveWorldLayerID.Value, false);
+
+        _maskMeshRenderer.material.SetInt(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, nextLayerID.LayerID);
     }
 
     private void RefreshLayers()
@@ -149,9 +165,6 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
 
         dotResult = GetTriggerablePortalDotResult(_containsEntity);
 
-        //WorldCore.Instance.SetNextLayer(
-        //    CalculateNextLayer(_containsEntity, dotResult, WorldCore.Instance.ActiveWorldLayerID.Value, false).LayerID);
-
         if (_lastPlayerDotResult.HasValue)
         {
             if (dotResult.SignsDiferrent(_lastPlayerDotResult.Value))
@@ -159,10 +172,7 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
                 WorldLayerID nextLayerID =
                     CalculateNextLayer(_containsEntity, _lastPlayerDotResult.Value, WorldCore.Instance.ActiveWorldLayerID.Value);
 
-                WorldCore.Instance.SetActiveLayer(nextLayerID.LayerID, 0);
-
-                //WorldCore.Instance.SetActiveLayer(nextLayerID.LayerID,
-                //    CalculateNextLayer(_containsEntity, dotResult, nextLayerID.LayerID, false).LayerID);
+                WorldCore.Instance.SetActiveLayer(nextLayerID.LayerID);
 
                 return;
             }
@@ -174,6 +184,14 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     public void OnLayerActivate()
     {
         SetPortalActive(true);
+
+        if (Application.isPlaying)
+        {
+            if (_maskMeshRenderer is null)
+                OnValidate();
+
+            RefreshNextLayerView();
+        }
     }
 
     public void OnLayerDeactivate()
@@ -185,6 +203,7 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     {
         _portalCenterTriggerBehaviour.gameObject.SetActive(value);
         _portalMask.gameObject.SetActive(value);
+        gameObject.SetActive(value);
         IsActive = value;
         OnActiveChange?.Invoke(this);
     }

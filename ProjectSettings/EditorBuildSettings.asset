@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Non-Euclide World/Scenes/Non-Euclid World Test.unity
-    guid: 49fc73b68ae8ad346b90fade7fe66f68
+    path: Assets/Non-Euclide World/Scenes/Non-Euclid World Test 1.unity
+    guid: 55a325ebd5b95cb4293ea4ba4a834e5a
   m_configObjects: {}

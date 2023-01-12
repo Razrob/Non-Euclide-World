@@ -8,6 +8,7 @@ using UnityEngine;
 [DefaultExecutionOrder(-500)] 
 public class WorldLayer : MonoBehaviour
 {
+    [Header("ID from 1 to 255")]
     [SerializeField] private int _layerID;
 
     [SerializeField, HideInInspector] private Collider[] _colliders;
@@ -38,6 +39,13 @@ public class WorldLayer : MonoBehaviour
         _callbackReceivers = GetComponentsInChildren<ILayerChangeCallbackReceiver>(true);
 
         WorldLayersRepository.Instance.TryRegisterLayer(this);
+        
+        _layerID = Mathf.Clamp(_layerID, 1, 255);
+        WorldCore.Instance.CheckMeshRenderers();
+        
+        if (WorldCore.Instance.ActiveWorldLayerID.HasValue &&
+            WorldCore.Instance.ActiveWorldLayerID.Value != _layerID)
+            SetLayerStencilParameter(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, _layerID);
     }
 
     private void Awake()
