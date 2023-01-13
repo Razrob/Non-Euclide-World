@@ -28,6 +28,16 @@ public class WorldLayer : MonoBehaviour
 
     private void OnValidate()
     {
+        Init();
+    }
+
+    private void Awake()
+    {
+        Init();
+    }
+
+    private void Init()
+    {
         _colliders = GetComponentsInChildren<Collider>(true)
             .Where(m => !m.gameObject.TryGetComponent(out WorldLayerExcludeMask excludeMask) || !excludeMask.ExcludeCollider)
             .ToArray();
@@ -38,19 +48,18 @@ public class WorldLayer : MonoBehaviour
 
         _callbackReceivers = GetComponentsInChildren<ILayerChangeCallbackReceiver>(true);
 
-        WorldLayersRepository.Instance.TryRegisterLayer(this);
-        
         _layerID = Mathf.Clamp(_layerID, 1, 255);
+        WorldLayersRepository.Instance.TryRegisterLayer(this);
         WorldCore.Instance.CheckMeshRenderers();
-        
+
         if (WorldCore.Instance.ActiveWorldLayerID.HasValue &&
             WorldCore.Instance.ActiveWorldLayerID.Value != _layerID)
             SetLayerStencilParameter(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, _layerID);
     }
 
-    private void Awake()
+    public void Refresh()
     {
-        OnValidate();
+        Init();
     }
 
     public void SetLayerStencilParameter(string parameterName, int value)

@@ -89,12 +89,20 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
                 {
                     if (info.PreviousWorldLayerID.HasValue)
                     {
-                        nextLayer = info.PreviousWorldLayerID;
+                        int layerID = info.PreviousWorldLayerID.Value;
+
                         if (withWrite)
-                            info.SetPreviousWorldLayerID(null);
+                            info.SetPreviousWorldLayerID(currentLayerID);
+
+                        nextLayer = layerID;
                     }
                     else
+                    {
                         nextLayer = currentLayerID;
+
+                        if (withWrite)
+                            info.SetPreviousWorldLayerID(currentLayerID);
+                    }
                 }
                 break;
         }
@@ -137,7 +145,14 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
         WorldLayerID nextLayerID =
             CalculateNextLayer(PortalTriggerableEntity.Instance, dotResult, WorldCore.Instance.ActiveWorldLayerID.Value, false);
 
-        _maskMeshRenderer.material.SetInt(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, nextLayerID.LayerID);
+        int id;
+
+        if (nextLayerID.LayerID != WorldCore.Instance.ActiveWorldLayerID.Value)
+            id = nextLayerID.LayerID;
+        else
+            id = 0;
+
+        _maskMeshRenderer.material.SetInt(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, id);
     }
 
     private void RefreshLayers()

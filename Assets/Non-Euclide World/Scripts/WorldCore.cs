@@ -41,12 +41,34 @@ public class WorldCore
         return _instance;
     }
 
-//#if UNITY_EDITOR
-//    [InitializeOnLoadMethod]
-//#endif
+#if UNITY_EDITOR
+    [InitializeOnLoadMethod]
+#endif
     [RuntimeInitializeOnLoadMethod]
     public static void InitWorld()
     {
+        if (Application.isPlaying)
+            Application.targetFrameRate = 60;
+
+        int iterationsCount = 0;
+
+        while (true)
+        {
+            try
+            {
+                foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
+                    worldLayer.Refresh();
+
+                break;
+            }
+            catch { }
+
+            if (iterationsCount > 256)
+                break;
+
+            iterationsCount++;
+        }
+
         Instance.OnConfigValidate();
     }
 

@@ -2,7 +2,8 @@ Shader "Stencil/Write"
 {
     Properties
     {
-        [HideInInspector] _StencilValue ("StencilValue", int) = 1
+        _StencilValue ("StencilValue", int) = 1
+        //[HideInInspector] 
     }
 
     SubShader

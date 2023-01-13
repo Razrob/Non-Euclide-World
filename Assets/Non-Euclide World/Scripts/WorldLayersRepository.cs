@@ -21,6 +21,9 @@ public class WorldLayersRepository
 
     public void TryRegisterLayer(WorldLayer worldLayer)
     {
+        if (_layers.Contains(worldLayer))
+            return;
+
         _layers.Add(worldLayer);
     }
 
