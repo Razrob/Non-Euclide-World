@@ -6,6 +6,7 @@ Shader "Stencil/StencilStandard"
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
+        [HDR] _Emission ("Emission", Color) = (0,0,0,0)
         [HideInInspector] _StencilValue ("StencilValue", int) = 0
     }
     SubShader
@@ -33,6 +34,7 @@ Shader "Stencil/StencilStandard"
 
         half _Glossiness;
         half _Metallic;
+        fixed4 _Emission;
         fixed4 _Color;
 
         UNITY_INSTANCING_BUFFER_START(Props)
@@ -46,6 +48,7 @@ Shader "Stencil/StencilStandard"
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
+            o.Emission = _Emission;
         }
         ENDCG
     }

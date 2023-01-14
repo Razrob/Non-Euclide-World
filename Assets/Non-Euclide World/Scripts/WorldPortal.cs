@@ -121,6 +121,8 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     {
         if (_containsEntity != null)
             RefreshLayers();
+
+        RefreshNextLayerView();
     }
 
     private void Update()
@@ -161,7 +163,7 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
             return;
 
         float dotResult = GetTriggerablePortalDotResult(_containsEntity);
-        float minCameraPortalDistance = Mathf.Min(_containsEntity.Camera.nearClipPlane * 10f, 0.3f);
+        float minCameraPortalDistance = Mathf.Min(_containsEntity.Camera.nearClipPlane * 8f, 0.3f);
         float portalOffcet = minCameraPortalDistance * 2f;
 
         float cameraToRealPortalDistance = RealPortalPlane.GetDistanceToPoint(_containsEntity.Camera.transform.position);

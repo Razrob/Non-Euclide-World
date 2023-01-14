@@ -31,6 +31,11 @@ public class WorldLayer : MonoBehaviour
         Init();
     }
 
+    private void OnTransformChildrenChanged()
+    {
+        Init();
+    }
+
     private void Awake()
     {
         Init();

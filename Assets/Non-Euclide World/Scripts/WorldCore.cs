@@ -47,8 +47,8 @@ public class WorldCore
     [RuntimeInitializeOnLoadMethod]
     public static void InitWorld()
     {
-        if (Application.isPlaying)
-            Application.targetFrameRate = 60;
+        //if (Application.isPlaying)
+        //    Application.targetFrameRate = 60;
 
         int iterationsCount = 0;
 
