@@ -19,9 +19,8 @@ public class WorldCore
 
     public const string STENCIL_VALUE_SHADER_PARAMETER = "_StencilValue";
 
-    public int? ActiveWorldLayerID { get; private set; }
-    public int? NextWorldLayerID { get; private set; }
-    public int? LastActiveWorldLayerID { get; private set; }
+    public WorldLayerID? ActiveWorldLayerID { get; private set; }
+    public WorldLayerID? LastActiveWorldLayerID { get; private set; }
 
     private HashSet<Material> _instancedMaterials;
 
@@ -41,14 +40,17 @@ public class WorldCore
         return _instance;
     }
 
-#if UNITY_EDITOR
-    [InitializeOnLoadMethod]
-#endif
-    [RuntimeInitializeOnLoadMethod]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void InitWorld()
     {
-        //if (Application.isPlaying)
-        //    Application.targetFrameRate = 60;
+        TryInitialize();
+        Instance.OnConfigValidate();
+    }
+
+    private void OnConfigValidate()
+    {
+        if (WorldLayersRepository.Instance.RegisteredLayers.Count is 0)
+            return;
 
         int iterationsCount = 0;
 
@@ -68,14 +70,6 @@ public class WorldCore
 
             iterationsCount++;
         }
-
-        Instance.OnConfigValidate();
-    }
-
-    private void OnConfigValidate()
-    {
-        if (WorldLayersRepository.Instance.RegisteredLayers.Count is 0)
-            return;
 
         CheckMeshRenderers();
         SetActiveLayer(WorldConfig.Instance.MainWorldLayerID);
@@ -108,8 +102,6 @@ public class WorldCore
         if (WorldLayersRepository.Instance.RegisteredLayers.Count is 0)
             return;
 
-        //try
-        //{
         string instancedMaterialsFolder = $"{CalculateParentFolderPath()}/{INSTANCED_MATERIALS_LOCAL_FOLDER_PATH}";
 
         string[] mats = Directory.GetFiles(instancedMaterialsFolder);
@@ -164,11 +156,6 @@ public class WorldCore
         }
 
         AssetDatabase.SaveAssets();
-        //}
-        //catch (Exception exception)
-        //{
-        //    Debug.LogError($"During materials checking was thrown an exception: {exception.Message}\n{exception.StackTrace}");
-        //}
 #endif
     }
 
@@ -193,27 +180,38 @@ public class WorldCore
     }
 #endif
 
-    public void SetActiveLayer(int layerID, int? nextLayerID = null)
+    private void ValidateActiveLayer()
     {
-        if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID
-            && NextWorldLayerID.HasValue && (!nextLayerID.HasValue || NextWorldLayerID.Value == nextLayerID))
+        if (!ActiveWorldLayerID.HasValue)
+            return;
+
+        WorldLayer worldLayer = WorldLayersRepository.Instance.RegisteredLayers.Find(layer => layer.LayerID == ActiveWorldLayerID.Value);
+
+        if (worldLayer is null 
+            || worldLayer.MeshRenderers.Count > 0 
+            && worldLayer.MeshRenderers.First().sharedMaterial.GetInt(STENCIL_VALUE_SHADER_PARAMETER) != 0)
+            ActiveWorldLayerID = null;
+    }
+
+    public void SetActiveLayer(WorldLayerID layerID)
+    {
+#if UNITY_EDITOR
+
+        ValidateActiveLayer();
+#endif
+
+        if (ActiveWorldLayerID.HasValue && ActiveWorldLayerID.Value == layerID)
             return;
 
         LastActiveWorldLayerID = ActiveWorldLayerID;
         ActiveWorldLayerID = layerID;
-        NextWorldLayerID = nextLayerID;
 
         foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
-            bool active = worldLayer.LayerID == layerID;
+            bool active = layerID == worldLayer.LayerID;
 
             worldLayer.SetLayerActivity(active);
             worldLayer.SetLayerStencilParameter(STENCIL_VALUE_SHADER_PARAMETER, active ? 0 : worldLayer.LayerID);
         }
-    }
-
-    public void SetNextLayer(int nextLayerID)
-    {
-        SetActiveLayer(ActiveWorldLayerID.Value, nextLayerID);
     }
 }

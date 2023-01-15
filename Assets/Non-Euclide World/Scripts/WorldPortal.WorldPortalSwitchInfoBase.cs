@@ -1,20 +1,21 @@
 ﻿using System;
 using UnityEngine;
 
+//do not rename (serialize reference)
 public partial class WorldPortal
 {
     [Serializable]
-    public abstract class WorldPortalSwitchInfoBase { }
+    public abstract class SwitchInfoBase { }
 
     [Serializable]
-    public class WorldPortalSpecificSwitchInfo : WorldPortalSwitchInfoBase
+    public class SpecificSwitchInfo : SwitchInfoBase
     {
         [SerializeField] private WorldLayerID _nextWorldLayer;
 
-        public int NextWorldLayerID => _nextWorldLayer.LayerID;
-        public int? PreviousWorldLayerID { get; private set; }
+        public WorldLayerID NextWorldLayerID => _nextWorldLayer;
+        public WorldLayerID? PreviousWorldLayerID { get; private set; }
 
-        public void SetPreviousWorldLayerID(int? id)
+        public void SetPreviousWorldLayerID(WorldLayerID? id)
         {
             PreviousWorldLayerID = id;
         }

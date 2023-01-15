@@ -1633,7 +1633,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -2032,7 +2032,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -3384,7 +3384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -3688,7 +3688,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -10457,11 +10457,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827920644400, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: m_Enabled
@@ -10666,7 +10666,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -27860,11 +27860,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _switchingMethod
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -47088,7 +47088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -47867,7 +47867,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -48551,7 +48551,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -49520,11 +49520,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _switchingMethod
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID
@@ -51508,7 +51508,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo
-      value: Assembly-CSharp WorldPortal/WorldPortalSpecificSwitchInfo
+      value: Assembly-CSharp WorldPortal/SpecificSwitchInfo
       objectReference: {fileID: 0}
     - target: {fileID: 5373414827903447115, guid: 09846f8d986d0e74491e673f3e2d0824, type: 3}
       propertyPath: _worldPortalSwitchInfo._nextWorldLayer._layerID

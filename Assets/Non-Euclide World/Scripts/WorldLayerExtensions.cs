@@ -2,22 +2,22 @@
 
 public static class WorldLayerExtensions
 {
-    public static WorldLayer CalculateNextLayer(int currentLayerID)
+    public static WorldLayer CalculateNextLayer(WorldLayerID currentLayerID)
     {
         foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
-            if (worldLayer.LayerID > currentLayerID)
+            if (worldLayer.LayerID > currentLayerID.LayerID)
                 return worldLayer;
 
         return WorldLayersRepository.Instance.RegisteredLayers.First();
     }
 
-    public static WorldLayer CalculatePreviousLayer(int currentLayerID)
+    public static WorldLayer CalculatePreviousLayer(WorldLayerID currentLayerID)
     {
         WorldLayer lastPreviousLayer = null;
 
         foreach (WorldLayer worldLayer in WorldLayersRepository.Instance.RegisteredLayers)
         {
-            if (worldLayer.LayerID >= currentLayerID)
+            if (worldLayer.LayerID >= currentLayerID.LayerID)
             {
                 if (lastPreviousLayer is null)
                     break;

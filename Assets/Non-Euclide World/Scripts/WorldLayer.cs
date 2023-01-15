@@ -57,8 +57,8 @@ public class WorldLayer : MonoBehaviour
         WorldLayersRepository.Instance.TryRegisterLayer(this);
         WorldCore.Instance.CheckMeshRenderers();
 
-        if (WorldCore.Instance.ActiveWorldLayerID.HasValue &&
-            WorldCore.Instance.ActiveWorldLayerID.Value != _layerID)
+        if (WorldCore.Instance.ActiveWorldLayerID != null &&
+            WorldCore.Instance.ActiveWorldLayerID != _layerID)
             SetLayerStencilParameter(WorldCore.STENCIL_VALUE_SHADER_PARAMETER, _layerID);
     }
 
