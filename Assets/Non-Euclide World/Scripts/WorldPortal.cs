@@ -25,26 +25,7 @@ public partial class WorldPortal : MonoBehaviour, ILayerChangeCallbackReceiver
     private void OnValidate()
     {
         _maskMeshRenderer = _portalMask.GetComponentInChildren<MeshRenderer>(true);
-
-        switch (_switchingMethod)
-        {
-            case WorldPortalSwitchingMethod.Switch_To_Specific_Layer_With_Reverse:
-
-                if (_worldPortalSwitchInfo?.GetType() != typeof(SpecificSwitchInfo))
-                    _worldPortalSwitchInfo = new SpecificSwitchInfo();
-
-                break;
-
-            case WorldPortalSwitchingMethod.Switch_To_Specific_Layer_With_Reverse_Two_Sided:
-
-                if (_worldPortalSwitchInfo?.GetType() != typeof(SpecificSwitchInfo))
-                    _worldPortalSwitchInfo = new SpecificSwitchInfo();
-
-                break;
-
-            default: _worldPortalSwitchInfo = null;
-                break;
-        }
+        _worldPortalSwitchInfo = PortalSwithInfoHandler.TryCreateInstance(_switchingMethod, _worldPortalSwitchInfo);
     }
 
     private void Awake()
